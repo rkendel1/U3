@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { connectToDatabase } from '@/lib/mongodb'
+import { jobDb } from '../../db/index.js'
 
 export async function POST(req) {
   try {
@@ -23,11 +23,8 @@ export async function POST(req) {
       )
     }
 
-    // Connect to database
-    const { db } = await connectToDatabase()
-
     // Create job
-    const job = {
+    const job = await jobDb.create({
       title,
       description,
       budget: Number(budget),
@@ -35,15 +32,10 @@ export async function POST(req) {
       skills,
       duration,
       clientId,
-      status: 'open',
-      createdAt: new Date(),
-      proposals: [],
-    }
-
-    const result = await db.collection('jobs').insertOne(job)
+    })
 
     return NextResponse.json(
-      { message: 'Job created successfully', jobId: result.insertedId },
+      { message: 'Job created successfully', jobId: job.id },
       { status: 201 }
     )
   } catch (error) {
@@ -61,26 +53,11 @@ export async function GET(req) {
     const category = searchParams.get('category')
     const search = searchParams.get('search')
 
-    const { db } = await connectToDatabase()
-
-    // Build query
-    const query = {}
-    if (category && category !== 'all') {
-      query.category = category
-    }
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-      ]
-    }
-
-    // Get jobs
-    const jobs = await db
-      .collection('jobs')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .toArray()
+    // Get jobs with filters
+    const jobs = await jobDb.findAll({
+      category: category || undefined,
+      search: search || undefined
+    })
 
     return NextResponse.json(jobs)
   } catch (error) {

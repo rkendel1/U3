@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { connectToDatabase } from '@/lib/mongodb'
+import { userDb } from '../../../db/index.js'
 
 const handler = NextAuth({
   providers: [
@@ -13,8 +13,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const { db } = await connectToDatabase()
-          const user = await db.collection('users').findOne({ email: credentials.email })
+          const user = await userDb.findByEmail(credentials.email)
 
           if (!user) {
             throw new Error('No user found with this email')
@@ -27,7 +26,7 @@ const handler = NextAuth({
           }
 
           return {
-            id: user._id.toString(),
+            id: user.id.toString(),
             name: user.name,
             email: user.email,
             userType: user.userType,

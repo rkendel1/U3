@@ -1,4 +1,5 @@
-import { Database, open } from 'sqlite';
+// app/db/index.js - JavaScript version for Next.js compatibility
+import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
@@ -6,9 +7,9 @@ import path from 'path';
 const DATABASE_FILE = './app/db/database.sqlite';
 const SCHEMA_FILE = './app/db/schema.sql';
 
-let cachedDb: Database | null = null;
+let cachedDb = null;
 
-export async function connect(): Promise<Database> {
+export async function connect() {
     if (cachedDb) {
         return cachedDb;
     }
@@ -31,7 +32,7 @@ export async function connect(): Promise<Database> {
     return db;
 }
 
-async function initializeSchema(db: Database) {
+async function initializeSchema(db) {
     try {
         // Check if tables exist
         const tables = await db.all(
@@ -50,19 +51,19 @@ async function initializeSchema(db: Database) {
     }
 }
 
-export async function executeQuery(query: string, params: any[] = []) {
+export async function executeQuery(query, params = []) {
     const db = await connect();
     const result = await db.all(query, params);
     return result;
 }
 
-export async function executeUpdate(query: string, params: any[] = []) {
+export async function executeUpdate(query, params = []) {
     const db = await connect();
     const result = await db.run(query, params);
     return result;
 }
 
-export async function executeGet(query: string, params: any[] = []) {
+export async function executeGet(query, params = []) {
     const db = await connect();
     const result = await db.get(query, params);
     return result;
@@ -70,7 +71,7 @@ export async function executeGet(query: string, params: any[] = []) {
 
 // User operations
 export const userDb = {
-    async create(userData: { email: string; password: string; name: string; userType: string }) {
+    async create(userData) {
         const result = await executeUpdate(
             'INSERT INTO users (email, password, name, userType) VALUES (?, ?, ?, ?)',
             [userData.email, userData.password, userData.name, userData.userType]
@@ -78,26 +79,18 @@ export const userDb = {
         return { id: result.lastID, ...userData };
     },
 
-    async findByEmail(email: string) {
+    async findByEmail(email) {
         return await executeGet('SELECT * FROM users WHERE email = ?', [email]);
     },
 
-    async findById(id: number) {
+    async findById(id) {
         return await executeGet('SELECT * FROM users WHERE id = ?', [id]);
     }
 };
 
 // Job operations
 export const jobDb = {
-    async create(jobData: {
-        title: string;
-        description: string;
-        budget: number;
-        category?: string;
-        skills?: string[];
-        duration?: string;
-        clientId?: number;
-    }) {
+    async create(jobData) {
         const skillsJson = jobData.skills ? JSON.stringify(jobData.skills) : null;
         const result = await executeUpdate(
             'INSERT INTO jobs (title, description, budget, category, skills, duration, clientId) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -106,14 +99,14 @@ export const jobDb = {
         return { id: result.lastID, ...jobData, skills: jobData.skills };
     },
 
-    async findAll(filters: { category?: string; search?: string } = {}) {
+    async findAll(filters = {}) {
         let query = `
             SELECT j.*, u.name as userName 
             FROM jobs j 
             LEFT JOIN users u ON j.clientId = u.id 
             WHERE 1=1
         `;
-        const params: any[] = [];
+        const params = [];
 
         if (filters.category && filters.category !== 'all') {
             query += ' AND j.category = ?';
@@ -128,18 +121,19 @@ export const jobDb = {
         query += ' ORDER BY j.createdAt DESC';
 
         const jobs = await executeQuery(query, params);
-        return jobs.map((job: any) => ({
+        return jobs.map((job) => ({
             ...job,
-            skills: job.skills ? JSON.parse(job.skills) : []
+            skills: job.skills ? JSON.parse(job.skills) : [],
+            user: job.userName ? { name: job.userName } : null
         }));
     },
 
-    async findByUserId(userId: number) {
+    async findByUserId(userId) {
         const jobs = await executeQuery(
             'SELECT * FROM jobs WHERE clientId = ? ORDER BY createdAt DESC',
             [userId]
         );
-        return jobs.map((job: any) => ({
+        return jobs.map((job) => ({
             ...job,
             skills: job.skills ? JSON.parse(job.skills) : []
         }));
