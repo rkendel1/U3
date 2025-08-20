@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Upwork Clone - Freelance Platform
+
+A modern freelance platform built with Next.js and SQLite, featuring user authentication, job posting, and job searching capabilities.
+
+## Features
+
+- **User Authentication**: Secure signup/login with NextAuth.js
+- **Job Management**: Post jobs, browse available jobs, and manage proposals
+- **SQLite Database**: Local database storage for development with automatic schema initialization
+- **Responsive Design**: Modern UI with Tailwind CSS
+- **Real-time Updates**: Dynamic content loading and form handling
+
+## Technology Stack
+
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Authentication**: NextAuth.js with credentials provider
+- **Database**: SQLite with automatic schema migration
+- **Password Hashing**: bcryptjs for secure password storage
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- npm, yarn, pnpm, or bun package manager
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd U3
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+Create a `.env.local` file in the root directory:
+```bash
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here-make-this-random-in-production
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application uses SQLite for local development with automatic schema initialization:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Database Location**: `./app/db/database.sqlite`
+- **Schema File**: `./app/db/schema.sql`
+- **Auto-initialization**: Database and tables are created automatically on first run
 
-## Deploy on Vercel
+### Database Schema
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application includes two main tables:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Users Table:**
+- `id` (INTEGER PRIMARY KEY)
+- `email` (TEXT UNIQUE)
+- `password` (TEXT - hashed)
+- `name` (TEXT)
+- `userType` (TEXT - 'client' or 'freelancer')
+- `createdAt`, `updatedAt` (DATETIME)
+
+**Jobs Table:**
+- `id` (INTEGER PRIMARY KEY)
+- `title`, `description` (TEXT)
+- `budget` (REAL)
+- `category`, `skills` (TEXT - JSON array for skills)
+- `duration`, `status` (TEXT)
+- `clientId` (INTEGER - foreign key to users)
+- `createdAt`, `updatedAt` (DATETIME)
+
+## Usage
+
+### User Registration
+1. Navigate to `/signup`
+2. Fill in name, email, password, and user type (client/freelancer)
+3. Submit to create account and automatic login
+
+### Job Posting
+1. Login as a client user
+2. Navigate to `/post-job`
+3. Fill in job details including title, description, budget, category, skills, and duration
+4. Submit to create job listing
+
+### Job Browsing
+1. Visit `/jobs` to view all available jobs
+2. Use search and category filters to find specific jobs
+3. Jobs display title, description, budget, client name, and required skills
+
+## API Endpoints
+
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/[...nextauth]` - Authentication (NextAuth.js)
+- `GET /api/jobs` - Fetch all jobs with optional filtering
+- `POST /api/jobs` - Create new job posting (requires authentication)
+
+## Development
+
+### Building for Production
+```bash
+npm run build
+```
+
+### Linting
+```bash
+npm run lint
+```
+
+### Database Operations
+
+The SQLite database operations are handled through:
+- `app/db/index.js` - Database connection and query utilities
+- `app/db/schema.sql` - Database schema definition
+
+## Recent Changes
+
+This application was recently migrated from MongoDB to SQLite for local development:
+
+- ✅ Removed MongoDB/Mongoose dependencies
+- ✅ Implemented SQLite with comprehensive query utilities
+- ✅ Updated all API routes to use SQLite
+- ✅ Maintained all existing functionality
+- ✅ Added automatic database schema initialization
+- ✅ Preserved user relationships and data integrity
+
+## Deployment
+
+For production deployment:
+
+1. Consider using a production database (PostgreSQL, MySQL, etc.)
+2. Update environment variables for production URLs
+3. Ensure proper security measures for NEXTAUTH_SECRET
+4. Build and deploy using your preferred platform
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Ensure all tests pass
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
