@@ -16,7 +16,7 @@ export default function Home() {
       <section className="text-center py-20 bg-gradient-to-r from-blue-500 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-5xl font-bold mb-6">
-            Find the Perfect Freelance Services
+            Hi Sibin!
           </h1>
           <p className="text-xl mb-8">
             Connect with talented freelancers and get your projects done
