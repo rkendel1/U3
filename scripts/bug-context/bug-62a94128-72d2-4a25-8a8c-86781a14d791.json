@@ -1,0 +1,10 @@
+{
+  "bug_id": "62a94128-72d2-4a25-8a8c-86781a14d791",
+  "description": "its broken: doesn't work anymore no sign in",
+  "severity": "medium",
+  "related_files": "",
+  "steps_to_reproduce": "",
+  "created_at": "2025-09-15T14:31:01Z",
+  "branch": "fix/bug-62a94128-72d2-4a25-8a8c-86781a14d791",
+  "status": "in_progress"
+}
